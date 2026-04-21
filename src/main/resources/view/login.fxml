@@ -54,7 +54,7 @@
                        prefWidth="1362.0"
                        style="-fx-border-color: BLACK;"
                        styleClass="login_title"
-                       text="STUDENT REGISTRATION&#10;"
+                       text="Farmingdale Student Registration System"
                        textAlignment="CENTER"
                        textFill="#111386"
                        wrapText="true">
