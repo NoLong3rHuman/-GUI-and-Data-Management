@@ -1,66 +1,72 @@
 package service;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.prefs.Preferences;
 
-public class UserSession {
+public final class UserSession {
 
     private static UserSession instance;
+    private static final Object LOCK = new Object();
+    private static final Preferences prefs =
+            Preferences.userNodeForPackage(UserSession.class);
 
-    private String userName;
-
-    private String password;
-    private String privileges;
+    private final String userName;
+    private final String password;
+    private final String privileges;
 
     private UserSession(String userName, String password, String privileges) {
         this.userName = userName;
         this.password = password;
         this.privileges = privileges;
-        Preferences userPreferences = Preferences.userRoot();
-        userPreferences.put("USERNAME",userName);
-        userPreferences.put("PASSWORD",password);
-        userPreferences.put("PRIVILEGES",privileges);
     }
 
-
-
-    public static UserSession getInstace(String userName,String password, String privileges) {
-        if(instance == null) {
+    public static UserSession createSession(String userName, String password, String privileges) {
+        synchronized (LOCK) {
             instance = new UserSession(userName, password, privileges);
+
+            prefs.put("username", userName);
+            prefs.put("password", password);
+            prefs.put("privileges", privileges);
+
+            return instance;
         }
-        return instance;
     }
 
-    public static UserSession getInstace(String userName,String password) {
-        if(instance == null) {
-            instance = new UserSession(userName, password, "NONE");
+    public static UserSession getCurrentSession() {
+        synchronized (LOCK) {
+            return instance;
         }
-        return instance;
     }
+
+    public static void clearSession() {
+        synchronized (LOCK) {
+            instance = null;
+            prefs.remove("username");
+            prefs.remove("password");
+            prefs.remove("privileges");
+        }
+    }
+
+    public static String getSavedUsername() {
+        return prefs.get("username", "");
+    }
+
+    public static String getSavedPassword() {
+        return prefs.get("password", "");
+    }
+
+    public static String getSavedPrivileges() {
+        return prefs.get("privileges", "");
+    }
+
     public String getUserName() {
-        return this.userName;
+        return userName;
     }
 
     public String getPassword() {
-        return this.password;
+        return password;
     }
 
     public String getPrivileges() {
-        return this.privileges;
-    }
-
-    public void cleanUserSession() {
-        this.userName = "";// or null
-        this.password = "";
-        this.privileges = "";// or null
-    }
-
-    @Override
-    public String toString() {
-        return "UserSession{" +
-                "userName='" + this.userName + '\'' +
-                ", privileges=" + this.privileges +
-                '}';
+        return privileges;
     }
 }
